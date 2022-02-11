@@ -49,8 +49,8 @@
               </ul>
             </li>-->
           </ul>
-          <form class="d-flex">
-            <input class="form-control me-2" type="date" placeholder="Search" aria-label="Search">
+          <form class="d-flex" method="GET" action="{% url 'myapp:whats-this-day' %}">
+            <input class="form-control me-2" type="date" name="date" required>
             <button class="btn btn-outline-success" type="submit">Go</button>
           </form>
         </div>

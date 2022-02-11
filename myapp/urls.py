@@ -12,5 +12,6 @@ urlpatterns = [
     path('view-task/<int:pk>', views.task_detail, name='task-detail'),
     path('update-task/<int:pk>', views.update_task, name='task-update'),
     path('new-task/', views.create_task, name='new-task'),
+    path('whats-this-day/', views.on_day, name="whats-this-day"),
 ]
 

@@ -88,3 +88,9 @@ def delete_todo(request, pk):
         return JsonResponse({"status": "deleted"})
     else:
         return HttpResponseNotAllowed("Not Allowed")
+
+def on_day(request):
+    d = request.GET.get('date')
+    print(d)
+    todo_list = ToDo.objects.filter(date=datetime.strptime(d, '%Y-%m-%d'))
+    return render(request, 'myapp/on_date.html', context={'todo_list': todo_list, 'date': d})

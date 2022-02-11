@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-w27^rth6&prp2v984(n91x=)#$0z^#h2r)+l1k8(r%^t*f$m&8'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['revisiondiary.pythonanywhere.com', 'localhost', '127.0.0.1']
 

@@ -1,0 +1,67 @@
+{% extends 'myapp/base.html' %}
+{% block page_title %}{{date}} {% endblock page_title %}
+{% block page_links_top %}{% endblock page_links_top %}
+{% block page_styles %}
+<style>
+    .y-todo{
+        cursor: pointer;
+    }
+    .check-icon{
+        cursor: pointer;
+    }
+</style>
+{% endblock page_styles %}
+{% block page_scripts_top %}{% endblock page_scripts_top %}
+{% block nav_links %}{% endblock nav_links %}
+
+
+{% block page_content %}
+    <div class="container mt-3 mb-5">
+        <h2>{{date}}</h2>
+        {% for todo in todo_list %}
+        <p class="lead fs-4">
+            <i data-pk="{{todo.pk}}" class="mx-1 check-icon fa {% if todo.is_completed %}fa-check-square text-success {% else %} fa-square text-danger{% endif %}" aria-hidden="true"></i>
+            <a class="text-decoration-none" href="{% url 'myapp:task-detail' todo.task.pk %}">{{todo.task.title}}</a>
+        </p>
+        {% endfor %}
+    </div>
+{% endblock page_content %}
+
+
+{% block page_links_bottom %}{% endblock page_links_bottom %}
+{% block page_scripts_bottom %}
+<script>
+    let yTodos = document.querySelectorAll('.y-todo')
+    yTodos.forEach(todo => {
+        let pk = todo.dataset.pk 
+        todo.addEventListener('click', todo=>{
+            update(`/delete-todo/${pk}` ,
+                [['csrfmiddlewaretoken', '{{csrf_token}}'], ['date', date]], 
+                ()=>{
+                    alert('Deleted')
+                    window.location.reload();
+                }, 
+                ()=>alert('Error'), 
+                null, 
+                null
+                )
+        })
+    })
+    let checkIcons = document.querySelectorAll('.check-icon')
+    checkIcons.forEach(icon => {
+        let pk = icon.dataset.pk 
+        icon.addEventListener('click', ()=>{
+            update(`/update-todo/${pk}`, 
+                    [['csrfmiddlewaretoken', '{{csrf_token}}']], 
+                    ()=>{
+                        alert('Congratulations! Done')
+                        window.location.reload()
+                    },
+                    ()=> alert('Error'),
+                    null,
+                    null
+            )
+        })
+    })
+</script>
+{% endblock page_scripts_bottom %}
