@@ -1,0 +1,23 @@
+{% extends 'myapp/base.html' %}
+{% block page_title %}Confirm Delete {{task.title}}{% endblock page_title %}
+{% block page_links_top %}{% endblock page_links_top %}
+{% block page_styles %}{% endblock page_styles %}
+{% block page_scripts_top %}{% endblock page_scripts_top %}
+{% block nav_links %}{% endblock nav_links %}
+{% block page_content %}
+
+<div class="container mt-3 mb-5">
+    <div class="w-50 m-auto">
+        <h3>Confirm Delete {{task.title}}?</h3>
+        <form method="POST">
+            {% csrf_token %}
+            {{form}}
+            <input type="submit" value="Confirm Delete" class="btn btn-danger">
+            <a href="{% url 'myapp:task-detail' task.pk %}">Cancel</a>
+        </form>
+    </div>
+</div>
+
+{% endblock page_content %}
+{% block page_links_bottom %}{% endblock page_links_bottom %}
+{% block page_scripts_bottom %}{% endblock page_scripts_bottom %}

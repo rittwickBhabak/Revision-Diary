@@ -1,0 +1,270 @@
+{% extends 'myapp/base.html' %}
+{% block page_title %}Create A New Task{% endblock page_title %}
+{% block page_links_top %}{% endblock page_links_top %}
+{% block page_styles %}
+<style>
+    .date{
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-collapse: collapse;
+    }
+    .calender-div{
+        width: 420px;
+        height: 490px;
+    }
+</style>
+{% endblock page_styles %}
+{% block page_scripts_top %}{% endblock page_scripts_top %}
+{% block nav_links %}{% endblock nav_links %}
+
+
+{% block page_content %}
+<div class="container mt-3 mb-5">
+    <form method="POST" class="m-auto mt-2 shadow p-3 w-75 rounded-top">
+        {% csrf_token %}
+        {% if form.pk %}
+        <input type="text" name="pk" id="pk" class="form-control" hidden value="{{form.pk}}">
+        {% endif %}
+        {% if form.pk %}
+        <h5>Update {{form.title}}</h5>
+        {% else %}
+        <h5>Add New Task</h5>
+        {% endif %}
+        <div class="mb-3">
+            <label for="title" class="form-label">Enter Task Title</label>
+            {% if form.pk %}
+            <input type="text" name="title" id="title" class="form-control" placeholder="Enter Task Title" value="{{form.title}}">
+            {% else %}
+            <input type="text" name="title" id="title" class="form-control" placeholder="Enter Task Title">
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Enter Description</label>
+            {% if form.pk %}
+            <textarea name="description" id="description" cols="30" rows="3" class="form-control">{{form.description}}</textarea>
+            {% else %}
+            <textarea name="description" id="description" cols="30" rows="3" class="form-control"></textarea>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="date-list-string" class="form-label">Dates</label>
+            {% if form.pk %}
+            <input type="text" name="date-list-string" id="date-list-string" class="form-control" readonly value="{{form.date_list_string}}">
+            {% else %}
+            <input type="text" name="date-list-string" id="date-list-string" class="form-control" readonly>
+            {% endif %}
+        </div>
+        <div class="calender-div m-auto bg-light">
+            <div class="header d-flex justify-content-between align-items-center w-100 border">
+                <div class="goto-prev"><button class=" btn btn-primary btn-sm" id="prev-month"><i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp;Prev</button></div>
+                <div id="month-name">Feb 2022</div>
+                <div class="goto-next"><button class=" btn btn-primary btn-sm" id="next-month">Next&nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></button></div>
+            </div>
+            <div class="dates w-100">
+                <div class="days">
+                    <div class="d-flex flex-row">
+                        <div class="date border">Mon</div>
+                        <div class="date border">Tue</div>
+                        <div class="date border">Wed</div>
+                        <div class="date border">Thu</div>
+                        <div class="date border">Fri</div>
+                        <div class="date border">Sat</div>
+                        <div class="date border">Sun</div>
+                    </div>
+                </div>
+                <div id="actual-dates" class=" d-flex flex-row flex-wrap"></div>
+            </div>
+        </div>
+
+
+        <input type="submit" value="Save" class="btn btn-primary m-auto d-block mt-3">
+    </form>
+</div>
+{% endblock page_content %}
+
+
+{% block page_links_bottom %}{% endblock page_links_bottom %}
+{% block page_scripts_bottom %}
+<script>
+    tinymce.init({
+    selector: 'textarea',
+    plugins: 'print preview powerpaste casechange  autolink directionality advcode visualblocks visualchars image link media mediaembed table charmap nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker  imagetools textpattern charmap  mentions quickbars linkchecker emoticons advtable export',
+    menubar: false,
+    toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor charmap emoticons image link',
+    quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+    });
+    let form = document.querySelector('form')
+    form.addEventListener('submit', event=>{
+        event.preventDefault()
+        let textarea = document.querySelector('textarea')
+        textarea.value = tinymce.get('textarea').getContent();
+        form.submit()
+    })
+</script>
+<script>
+    var today = new Date();
+    var m = today.getMonth()
+    var y = today.getFullYear()
+    var m_dict = {'0': 'Jan','1': 'Feb','2': 'Mar','3': 'Apr','4': 'May','5': 'Jun','6': 'Jul','7': 'Aug','8': 'Sep','9': 'Oct','10': 'Nov','11': 'Dec'}
+    var active_m_name = m_dict[m]
+    var active_m = m
+    var active_y = y 
+    var selected_dates = []
+    function checkLeapYear(year) {
+        if ((0 == year % 4) && (0 != year % 100) || (0 == year % 400)) {
+            return true 
+        } else {
+            return false
+        }
+    }
+
+    function next(m, y){
+        var n_m = (m + 1) % 12
+        var n_y = m==11 ? y + 1 : y 
+        active_m = n_m
+        active_y = n_y
+        active_m_name = m_dict[active_m]
+    }
+    function prev(m, y){
+        var p_m = m==0 ? 11 : m - 1 
+        var p_y = m==0 ? y - 1 : y 
+        active_m = p_m 
+        active_y = p_y 
+        active_m_name = m_dict[active_m]
+    }
+    function getNoOfDays(m, y){
+        if(checkLeapYear(y) && m==1)
+            return 29
+        if(!checkLeapYear(y) && m==1)
+            return 28
+        var days = {
+            '0': '31',
+            '2': '31',
+            '3': '30',
+            '4': '31',
+            '5': '30',
+            '6': '31',
+            '7': '31',
+            '8': '30',
+            '9': '31',
+            '10': '30',
+            '11': '31'
+        }
+        return +days[m]
+    }
+    
+    let prevBtn = document.querySelector('#prev-month')
+    let nextBtn = document.querySelector('#next-month')
+    function populate(){
+        let totalDays = getNoOfDays(active_m, active_y)
+        let first_date = new Date(active_y, active_m, 1)
+        let last_date = new Date(active_y, active_m, totalDays)
+        let pre_blanks = first_date.getDay() - 1 
+        // let post_blanks = 7 - last_date.getDay()
+        // if(post_blanks==7)
+        post_blanks = 0
+        let dates_list = []
+        for(let i =0;i<(+pre_blanks);i++) 
+            dates_list.push(0)
+        for(let i =1;i<=totalDays;i++) 
+            dates_list.push(i)
+        for(let i =0;i<(+post_blanks);i++) 
+            dates_list.push(0)
+        
+        let actualDates = document.querySelector('#actual-dates')
+        let monthName = document.querySelector('#month-name')
+        monthName.innerHTML = `${active_m_name} ${active_y}`
+        actualDates.innerHTML = ''
+        dates_list.forEach(date => {
+            let classList = ''
+            if(selected_dates.includes(`${date}-${active_m}-${active_y}`)){
+                classList = 'btn btn-primary'
+            } else {
+                classList = 'btn btn-outline-primary'
+            }
+            if(date==0){
+                actualDates.innerHTML = actualDates.innerHTML + 
+                `<div class="date border"></div>`
+            } else if(1<=date && date<=9){
+                actualDates.innerHTML = actualDates.innerHTML + 
+                `<div class="date border"><button role="button" id="date-${date}-${active_m}-${active_y}" data-date="${date}" data-month="${active_m}" data-year="${active_y}" onclick="toggleSelect(event)" class="${classList}">&nbsp;${date}</button></div>`
+            } else{
+                actualDates.innerHTML = actualDates.innerHTML + 
+                `<div class="date border"><button role="button" id="date-${date}-${active_m}-${active_y}" data-date="${date}" data-month="${active_m}" data-year="${active_y}" onclick="toggleSelect(event)" class="${classList}">${date}</button></div>`
+            }
+            
+        })
+    }
+    prevBtn.addEventListener('click', (e)=>{
+        e.preventDefault()
+        prev(active_m, active_y)
+        populate()
+    })
+    nextBtn.addEventListener('click', (e)=>{
+        e.preventDefault()
+        next(active_m, active_y)
+        populate()
+    })
+    
+    function select(date){
+        console.log(date)
+        let btn = document.querySelector(`#date-${date}`)
+        btn.classList.remove('btn-outline-primary')
+        btn.classList.add('btn-primary')
+        btn.blur()
+        selected_dates.push(date)
+    }
+    function unselect(date){
+        console.log(date)
+        let btn = document.querySelector(`#date-${date}`)
+        btn.classList.add('btn-outline-primary')
+        btn.classList.remove('btn-primary')
+        btn.blur()
+        let index = selected_dates.indexOf(date)
+        if(index > -1){
+            selected_dates.splice(index, 1)
+        }
+    }
+    function toggleSelect(event){
+        event.preventDefault()
+        let d = event.target.dataset.date 
+        let m = event.target.dataset.month 
+        let y = event.target.dataset.year 
+        let date = `${d}-${m}-${y}`
+        if(selected_dates.includes(date)){
+            unselect(date)
+        }else {
+            select(date) 
+        }
+        let input = document.querySelector('#date-list-string')
+        input.value = ''
+        selected_dates.forEach(date=>{
+            input.value = input.value +
+            `${date},`
+        })
+    }
+</script>
+
+    {% if form.pk %}
+    <script>
+        window.onload = ()=> {
+            let str = '{{form.date_list_string}}'
+            let list = str.split(',').slice(0, -1)
+            list.forEach(item=>{
+                selected_dates.push(item)
+            })
+            populate()
+            console.log(selected_dates)
+        }
+    </script>
+    {% else %}
+    <script>
+        window.onload = ()=> {
+            populate()
+        }
+    </script>
+    {% endif %}
+{% endblock page_scripts_bottom %}
